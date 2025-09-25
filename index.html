@@ -3,27 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Grifo Tools — Conversor (WebP/JPG/PNG) — MVP</title>
+  <title>Grifo Tools — Conversor (WebP/JPG/PNG) — MVP 100% client-side</title>
   <meta name="description" content="Conversor & Compressor de Imagens para WebP/JPG/PNG — 100% client-side. Privado, rápido e acessível." />
 
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="shortcut icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" sizes="192x192" href="/android-chrome-192x192.png">
-  <link rel="icon" sizes="512x512" href="/android-chrome-512x512.png">
+  <!-- Favicons (opcional; use caminhos relativos para GitHub Pages) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" sizes="192x192" href="./android-chrome-192x192.png">
+  <link rel="icon" sizes="512x512" href="./android-chrome-512x512.png">
   <meta name="theme-color" content="#111827">
 
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tema escuro com bom contraste
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: {50:'#EFF6FF',100:'#DBEAFE',200:'#BFDBFE',300:'#93C5FD',400:'#60A5FA',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8',800:'#1E40AF',900:'#1E3A8A'}
+            brand: {
+              50:'#EFF6FF',100:'#DBEAFE',200:'#BFDBFE',300:'#93C5FD',400:'#60A5FA',
+              500:'#3B82F6',600:'#2563EB',700:'#1D4ED8',800:'#1E40AF',900:'#1E3A8A'
+            }
           }
         }
       }
@@ -31,25 +33,28 @@
   </script>
   <!-- JSZip para gerar ZIP -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
   <style>
     html { scroll-behavior: smooth; }
     :focus { outline: 2px solid #60A5FA; outline-offset: 2px; }
   </style>
 </head>
 <body class="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-brand-500/30">
+  <!-- Header -->
   <header class="border-b border-neutral-800 bg-neutral-900/60 backdrop-blur supports-[backdrop-filter]:bg-neutral-900/40 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
       <a href="https://grifo.agency" target="_blank" rel="noopener" class="shrink-0" aria-label="Visitar site da Grifo">
-        <img id="logoImg" src="logo.png" alt="Grifo" class="h-8 w-auto" onerror="this.style.display='none';document.getElementById('logoFallback').classList.remove('hidden')" />
+        <img id="logoImg" src="./logo.png" alt="Grifo" class="h-8 w-auto"
+             onerror="this.style.display='none';document.getElementById('logoFallback').classList.remove('hidden')" />
         <span id="logoFallback" class="hidden font-semibold text-brand-400">Grifo</span>
       </a>
       <div class="flex-1"></div>
-      <h1 class="text-sm md:text-base font-medium text-neutral-200">Conversor WebP/JPG/PNG — MVP 100% client‑side</h1>
+      <h1 class="text-sm md:text-base font-medium text-neutral-200">Conversor (WebP/JPG/PNG) — MVP 100% client-side</h1>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 grid md:grid-cols-12 gap-6">
-    <!-- Coluna esquerda: Dropzone + Configs -->
+    <!-- Coluna esquerda -->
     <section class="md:col-span-4 space-y-6">
       <!-- Dropzone -->
       <div id="dropzone" class="border-2 border-dashed border-neutral-700 rounded-2xl p-6 text-center bg-neutral-900/40 hover:border-brand-500 transition cursor-pointer">
@@ -63,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Configurações (accordion no mobile) -->
+      <!-- Configurações -->
       <details class="group md:open" open>
         <summary class="list-none select-none cursor-pointer flex items-center justify-between bg-neutral-900/60 border border-neutral-800 rounded-2xl px-4 py-3">
           <span class="font-medium">Configurações</span>
@@ -71,25 +76,29 @@
         </summary>
         <div class="p-4 border border-neutral-800 border-t-0 rounded-b-2xl bg-neutral-900/40 space-y-4">
           <div>
-            <label for="format" class="block text-sm text-neutral-300 mb-1">Formato de saída</label>
-            <select id="format" class="w-full px-3 py-2 rounded-lg bg-neutral-800/70 border border-neutral-700 text-neutral-100 text-sm">
+            <label for="formatSel" class="block text-sm text-neutral-300 mb-1">Formato de saída</label>
+            <select id="formatSel" class="w-full px-3 py-2 rounded-lg bg-neutral-800/70 border border-neutral-700 text-neutral-100 text-sm">
               <option value="webp">WebP (recomendado)</option>
               <option value="jpg">JPG</option>
               <option value="png">PNG (lossless)</option>
             </select>
+            <p id="formatHint" class="text-xs text-neutral-500 mt-1">Escolha o formato final do lote.</p>
           </div>
+
           <div>
             <label for="quality" class="block text-sm text-neutral-300 mb-1">Qualidade (1–100)</label>
             <div class="flex items-center gap-3">
               <input id="quality" type="range" min="1" max="100" value="85" class="w-full" />
               <input id="qualityInput" type="number" min="1" max="100" value="85" class="w-20 px-3 py-2 rounded-lg bg-neutral-800/70 border border-neutral-700 text-neutral-100 text-sm" />
             </div>
-            <p id="qualityNote" class="text-xs text-neutral-500 mt-1 hidden">PNG é lossless — qualidade não se aplica.</p>
+            <p id="qualityHint" class="text-xs text-neutral-500 mt-1">WebP/JPG usam qualidade; PNG é lossless. Em JPG, fundo só é aplicado se houver transparência.</p>
           </div>
+
           <div id="jpgBgWrap" class="hidden">
             <label for="jpgBg" class="block text-sm text-neutral-300 mb-1">Fundo para transparência (JPG)</label>
-            <input id="jpgBg" type="color" value="#FFFFFF" class="w-16 h-9 p-1 rounded-md bg-neutral-800/70 border border-neutral-700" />
+            <input id="jpgBg" type="color" value="#FFFFFF" class="h-9 w-16 rounded-md bg-neutral-800 border border-neutral-700 p-1" />
           </div>
+
           <div class="space-y-2">
             <label class="inline-flex items-center gap-2">
               <input id="resizeToggle" type="checkbox" class="accent-brand-500" checked />
@@ -106,12 +115,14 @@
               </div>
             </div>
           </div>
+
           <div>
             <label class="inline-flex items-center gap-2">
               <input id="stripMeta" type="checkbox" class="accent-brand-500" checked />
               <span class="text-sm">Remover metadata (EXIF/ICC)</span>
             </label>
           </div>
+
           <div class="flex items-center gap-3">
             <button id="savePreset" class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Salvar preset</button>
             <select id="applyPreset" class="px-3 py-2 rounded-xl bg-neutral-800/70 border border-neutral-700 text-sm text-neutral-100 min-w-[10rem]">
@@ -119,6 +130,7 @@
             </select>
             <button id="deletePreset" class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Excluir preset</button>
           </div>
+
           <div class="border-t border-neutral-800 pt-3">
             <label for="concurrency" class="block text-sm text-neutral-300 mb-1">Avançado — Concorrência</label>
             <input id="concurrency" type="number" min="1" max="8" value="3" class="w-24 px-3 py-2 rounded-lg bg-neutral-800/70 border border-neutral-700 text-neutral-100 text-sm" />
@@ -132,14 +144,14 @@
       </div>
     </section>
 
-    <!-- Coluna direita: Lista de arquivos -->
+    <!-- Coluna direita -->
     <section class="md:col-span-8 space-y-4">
       <div class="flex flex-wrap items-center gap-2">
         <button id="btnConvert" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium">Converter</button>
-        <button id="btnPause" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Pausar</button>
-        <button id="btnResume" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Retomar</button>
-        <button id="btnClear" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Limpar fila</button>
-        <button id="btnZip" class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Baixar ZIP</button>
+        <button id="btnPause"   class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Pausar</button>
+        <button id="btnResume"  class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Retomar</button>
+        <button id="btnClear"   class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Limpar fila</button>
+        <button id="btnZip"     class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Baixar ZIP</button>
       </div>
 
       <div class="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-4">
@@ -165,78 +177,67 @@
   <div class="md:hidden fixed bottom-0 inset-x-0 border-t border-neutral-800 bg-neutral-900/80 backdrop-blur p-3">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
       <button id="mConvert" class="px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium">Converter</button>
-      <button id="mPause" class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Pausar</button>
-      <button id="mResume" class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Retomar</button>
-      <button id="mZip" class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">ZIP</button>
+      <button id="mPause"   class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Pausar</button>
+      <button id="mResume"  class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">Retomar</button>
+      <button id="mZip"     class="px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">ZIP</button>
     </div>
   </div>
 
   <footer class="max-w-7xl mx-auto px-4 py-10 text-xs text-neutral-500">
-    100% client-side · Sem coleta de dados · Feito para a Grifo Agency
+    100% client-side · Sem coleta de dados · Feito para a Grifo Agency — Ctrl/⌘+Enter: Converter · Esc: Pausar
   </footer>
 
   <script>
   // =====================
-  // Utilidades & Estado
+  // Helpers & Estado
   // =====================
-  const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const $ = (s) => document.querySelector(s);
 
-  const fileInput = $('#fileInput');
-  const dropzone = $('#dropzone');
-  const fileList = $('#fileList');
-  const queueInfo = $('#queueInfo');
-  const totalBar = $('#totalBar');
-  const totalText = $('#totalText');
-  const summary = $('#summary');
-  const statusLive = $('#statusLive');
+  const fileInput   = $('#fileInput');
+  const dropzone    = $('#dropzone');
+  const fileList    = $('#fileList');
+  const queueInfo   = $('#queueInfo');
+  const totalBar    = $('#totalBar');
+  const totalText   = $('#totalText');
+  const summary     = $('#summary');
+  const statusLive  = $('#statusLive');
 
   const btns = {
-    convert: $('#btnConvert'), pause: $('#btnPause'), resume: $('#btnResume'), clear: $('#btnClear'), zip: $('#btnZip'),
-    mConvert: $('#mConvert'), mPause: $('#mPause'), mResume: $('#mResume'), mZip: $('#mZip')
+    convert: $('#btnConvert'), pause:   $('#btnPause'),  resume: $('#btnResume'),
+    clear:   $('#btnClear'),   zip:     $('#btnZip'),
+    mConvert: $('#mConvert'),  mPause:  $('#mPause'),    mResume: $('#mResume'), mZip: $('#mZip')
   };
 
-  const qualityRange = $('#quality');
-  const qualityInput = $('#qualityInput');
-  const qualityNote = $('#qualityNote');
-  const resizeToggle = $('#resizeToggle');
-  const maxW = $('#maxW');
-  const maxH = $('#maxH');
-  const stripMeta = $('#stripMeta');
-  const concurrencyInput = $('#concurrency');
-  const savePresetBtn = $('#savePreset');
+  const formatSel      = $('#formatSel');
+  const qualityRange   = $('#quality');
+  const qualityInput   = $('#qualityInput');
+  const qualityHint    = $('#qualityHint');
+  const jpgBgWrap      = $('#jpgBgWrap');
+  const jpgBg          = $('#jpgBg');
+  const resizeToggle   = $('#resizeToggle');
+  const maxW           = $('#maxW');
+  const maxH           = $('#maxH');
+  const stripMeta      = $('#stripMeta');
+  const concurrencyInp = $('#concurrency');
+  const savePresetBtn  = $('#savePreset');
   const applyPresetSel = $('#applyPreset');
-  const deletePresetBtn = $('#deletePreset');
-  const formatSel = $('#format');
-  const jpgBgWrap = $('#jpgBgWrap');
-  const jpgBg = $('#jpgBg');
+  const deletePresetBtn= $('#deletePreset');
 
-  const LIMITS = {
-    MAX_FILES: 500,
-    MAX_FILE_MB: 100,
-    MAX_SIDE: 12000
-  };
+  const LIMITS = { MAX_FILES: 500, MAX_FILE_MB: 100, MAX_SIDE: 12000 };
 
-  // Suporte a WebP
-  let webpSupported = (function(){
-    try { const c = document.createElement('canvas'); return c.toDataURL && c.toDataURL('image/webp').indexOf('data:image/webp') === 0; } catch(e) { return false; }
-  })();
-
-  // Estado da fila
   const state = {
-    items: [], // { id, file, name, origBytes, status, progress, stage, resultBlob, url }
-    nextId: 1,
-    running: 0,
-    paused: false,
-    concurrency: 3
+    items: [], // { id, file, name, origBytes, status, progress, stage, hadAlpha, bgApplied, bgColor, resultBlob, url }
+    nextId: 1, running: 0, paused: false, concurrency: 3
   };
 
-  // Presets (localStorage)
+  // Presets v2
   const PRESETS_KEY = 'grifo_img_presets_v2';
   function loadPresets(){
     const raw = localStorage.getItem(PRESETS_KEY);
     const list = raw ? JSON.parse(raw) : {};
-    applyPresetSel.innerHTML = '<option value="">Aplicar preset…</option>' + Object.keys(list).map(k=>`<option value="${k}">${k}</option>`).join('');
+    applyPresetSel.innerHTML =
+      '<option value="">Aplicar preset…</option>' +
+      Object.keys(list).map(k => `<option value="${k}">${k}</option>`).join('');
     return list;
   }
   function savePreset(name){
@@ -244,86 +245,100 @@
     list[name] = {
       format: formatSel.value,
       q: Number(qualityInput.value),
+      jpgBg: jpgBg.value,
       resize: resizeToggle.checked,
-      mw: Number(maxW.value),
-      mh: Number(maxH.value),
-      cc: Number(concurrencyInput.value),
-      jpgBg: jpgBg.value
+      mw: Number(maxW.value), mh: Number(maxH.value),
+      cc: Number(concurrencyInp.value)
     };
     localStorage.setItem(PRESETS_KEY, JSON.stringify(list));
     loadPresets();
   }
   function deletePreset(name){
-    const list = loadPresets(); delete list[name]; localStorage.setItem(PRESETS_KEY, JSON.stringify(list)); loadPresets();
+    const list = loadPresets(); delete list[name];
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(list)); loadPresets();
   }
   loadPresets();
 
-  // UI: habilitar/desabilitar qualidade e mostrar bg do JPG
-  function refreshQualityVisibility(){
+  // UI format/quality
+  function applyFormatUI(){
     const f = formatSel.value;
     const isPNG = f === 'png';
     const isJPG = f === 'jpg';
-    qualityRange.disabled = isPNG; qualityInput.disabled = isPNG;
-    qualityNote.classList.toggle('hidden', !isPNG);
+    [qualityRange, qualityInput].forEach(el => el.disabled = isPNG);
+    qualityHint.textContent = isPNG
+      ? 'PNG é lossless — qualidade não se aplica. Em JPG, fundo só é aplicado se houver transparência.'
+      : 'WebP/JPG usam qualidade; PNG é lossless. Em JPG, fundo só é aplicado se houver transparência.';
     jpgBgWrap.classList.toggle('hidden', !isJPG);
   }
-  formatSel.addEventListener('change', refreshQualityVisibility);
-  refreshQualityVisibility();
+  formatSel.addEventListener('change', applyFormatUI);
+  applyFormatUI();
 
-  // Sincronizar qualidade range/input
+  // Sync qualidade range/input
   qualityRange.addEventListener('input', () => qualityInput.value = qualityRange.value);
-  qualityInput.addEventListener('input', () => { let v = Math.max(1, Math.min(100, Number(qualityInput.value)||85)); qualityInput.value = v; qualityRange.value = v; });
+  qualityInput.addEventListener('input', () => {
+    let v = Math.max(1, Math.min(100, Number(qualityInput.value)||85));
+    qualityInput.value = v; qualityRange.value = v;
+  });
 
-  // Importar arquivos
+  // Drop / Select
   dropzone.addEventListener('click', () => fileInput.click());
   dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.classList.add('border-brand-500'); });
   dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('border-brand-500'));
   dropzone.addEventListener('drop', (e)=>{ e.preventDefault(); dropzone.classList.remove('border-brand-500'); addFiles(e.dataTransfer.files); });
   fileInput.addEventListener('change', ()=> addFiles(fileInput.files));
 
-  // Colar imagens do clipboard (Ctrl/⌘+V)
+  // Clipboard paste (Ctrl/⌘+V)
   window.addEventListener('paste', async (e)=>{
     const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
-    const imgs = items.filter(it=> it.type && it.type.startsWith('image/'));
+    const imgs = items.filter(it => it.type && it.type.startsWith('image/'));
     if(!imgs.length) return;
-    const blobs = await Promise.all(imgs.map(it=> it.getAsFile()));
+    const blobs = await Promise.all(imgs.map(it => it.getAsFile()));
     const files = blobs.map((b,i)=> new File([b], `clipboard-${Date.now()}-${i}.${(b.type.split('/')[1]||'png')}`, { type: b.type }));
     addFiles(files);
     notify(`${files.length} imagem(ns) coladas do clipboard.`);
   });
 
-  function addFiles(fileListLike){
-    const files = Array.from(fileListLike || []);
+  function addFiles(listLike){
+    const files = Array.from(listLike || []);
     if(!files.length) return;
 
-    const currentCount = state.items.length;
-    const allowed = Math.max(0, LIMITS.MAX_FILES - currentCount);
+    const allowed = Math.max(0, LIMITS.MAX_FILES - state.items.length);
     const toAdd = files.slice(0, allowed);
-    if(files.length > toAdd.length) alert(`Limite de ${LIMITS.MAX_FILES} arquivos por lote. ${files.length - toAdd.length} não foram adicionados.`);
+    if(files.length > toAdd.length)
+      alert(`Limite de ${LIMITS.MAX_FILES} arquivos por lote. ${files.length - toAdd.length} não foram adicionados.`);
 
     toAdd.forEach(file => {
       if(!/^image\/(png|jpe?g|webp)$/i.test(file.type)){ notify(`Tipo não suportado: ${file.name}`); return; }
       const mb = file.size / (1024*1024);
       if(mb > LIMITS.MAX_FILE_MB){ notify(`Arquivo muito grande (> ${LIMITS.MAX_FILE_MB}MB): ${file.name}`); return; }
       const id = state.nextId++;
-      const item = { id, file, name: file.name, origBytes: file.size, status:'Fila', progress:0, stage:'', resultBlob:null, url:null };
-      state.items.push(item); renderItem(item);
+      const item = { id, file, name: file.name, origBytes: file.size, status:'Fila', progress:0, stage:'',
+                     hadAlpha:false, bgApplied:false, bgColor:'#FFFFFF', resultBlob:null, url:null };
+      state.items.push(item);
+      renderItem(item);
     });
     updateSummary();
   }
 
   function renderItem(item){
     const li = document.createElement('li');
-    li.id = `item-${item.id}`; li.className = 'p-3 rounded-xl border border-neutral-800 bg-neutral-900/40';
+    li.id = `item-${item.id}`;
+    li.className = 'p-3 rounded-xl border border-neutral-800 bg-neutral-900/40';
     li.innerHTML = `
       <div class="flex items-center gap-3">
-        <div class="h-14 w-14 rounded-lg overflow-hidden bg-neutral-800 shrink-0"><img alt="miniatura" class="h-full w-full object-cover" /></div>
+        <div class="h-14 w-14 rounded-lg overflow-hidden bg-neutral-800 shrink-0">
+          <img alt="miniatura" class="h-full w-full object-cover" />
+        </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
-            <div class="truncate text-sm"><span class="text-neutral-200 truncate inline-block max-w-[18rem]" title="${item.name}">${item.name}</span></div>
+            <div class="truncate text-sm">
+              <span class="text-neutral-200 truncate inline-block max-w-[18rem]" title="${item.name}">${item.name}</span>
+            </div>
             <div class="text-xs text-neutral-400" id="size-${item.id}">${fmtBytes(item.origBytes)}</div>
           </div>
-          <div class="mt-2 w-full h-2 bg-neutral-800 rounded-full overflow-hidden"><div id="bar-${item.id}" class="h-2 bg-brand-600 transition-[width] duration-200" style="width:0%"></div></div>
+          <div class="mt-2 w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+            <div id="bar-${item.id}" class="h-2 bg-brand-600 transition-[width] duration-200" style="width:0%"></div>
+          </div>
           <div class="mt-1 text-xs text-neutral-400 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span id="stage-${item.id}">Fila</span>
@@ -339,13 +354,24 @@
       </div>`;
     fileList.appendChild(li);
 
-    const imgTag = li.querySelector('img'); const r = new FileReader(); r.onload = () => imgTag.src = r.result; r.readAsDataURL(item.file);
-    li.querySelector(`#re-${item.id}`).addEventListener('click', ()=>{ if(item.url){ URL.revokeObjectURL(item.url); item.url = null; } item.resultBlob=null; item.status='Fila'; item.progress=0; item.stage=''; updateItem(item); schedule(); });
+    const imgTag = li.querySelector('img');
+    const r = new FileReader(); r.onload = () => imgTag.src = r.result; r.readAsDataURL(item.file);
+
+    li.querySelector(`#re-${item.id}`).addEventListener('click', ()=>{
+      if(item.url){ URL.revokeObjectURL(item.url); item.url = null; }
+      item.resultBlob = null; item.status='Fila'; item.progress=0; item.stage='';
+      updateItem(item); schedule();
+    });
   }
 
   function updateItem(item){
-    const bar = $(`#bar-${item.id}`), stage = $(`#stage-${item.id}`), eco = $(`#eco-${item.id}`), size = $(`#size-${item.id}`), dl = $(`#dl-${item.id}`);
-    const badge = $(`#badge-${item.id}`);
+    const bar = document.querySelector(`#bar-${item.id}`);
+    const stage = document.querySelector(`#stage-${item.id}`);
+    const eco = document.querySelector(`#eco-${item.id}`);
+    const size = document.querySelector(`#size-${item.id}`);
+    const dl = document.querySelector(`#dl-${item.id}`);
+    const badge = document.querySelector(`#badge-${item.id}`);
+
     if(bar) bar.style.width = `${Math.floor(item.progress)}%`;
     if(stage) stage.textContent = item.stage || '';
 
@@ -356,7 +382,7 @@
         if(f === 'jpg' && item.bgApplied){
           badge.textContent = `JPG: fundo ${(item.bgColor||'#FFFFFF').toUpperCase()}`;
           badge.classList.remove('hidden');
-        } else if(f !== 'jpg'){
+        } else if(f !== 'jpg') {
           badge.textContent = 'Transparência preservada';
           badge.classList.remove('hidden');
         } else {
@@ -368,7 +394,8 @@
     }
 
     if(item.resultBlob){
-      const saving = item.origBytes - item.resultBlob.size; const pct = item.origBytes ? (saving / item.origBytes) * 100 : 0;
+      const saving = item.origBytes - item.resultBlob.size;
+      const pct = item.origBytes ? (saving / item.origBytes) * 100 : 0;
       eco.textContent = `${fmtBytes(item.origBytes)} → ${fmtBytes(item.resultBlob.size)} (${pct>0?'-':''}${pct.toFixed(0)}%)`;
       size.textContent = fmtBytes(item.resultBlob.size);
       dl.classList.remove('opacity-40','pointer-events-none');
@@ -378,20 +405,21 @@
   }
 
   function updateSummary(){
-    const total = state.items.length; const done = state.items.filter(i=>i.status==='Concluído').length;
+    const total = state.items.length;
+    const done  = state.items.filter(i=>i.status==='Concluído').length;
     summary.textContent = `${total} itens · ${done} concluídos`;
     queueInfo.textContent = total ? `${total} arquivo(s) na fila` : 'Nenhum arquivo adicionado';
-    const avg = total? (state.items.reduce((a,i)=>a + (i.progress||0),0) / total) : 0;
-    totalBar.style.width = `${avg.toFixed(0)}%`; totalText.textContent = `${done}/${total} concluídos (${avg.toFixed(0)}%)`;
+    const avg = total ? (state.items.reduce((a,i)=>a + (i.progress||0),0) / total) : 0;
+    totalBar.style.width = `${avg.toFixed(0)}%`;
+    totalText.textContent = `${done}/${total} concluídos (${avg.toFixed(0)}%)`;
   }
 
   function notify(msg){ statusLive.textContent = msg; }
   function fmtBytes(b){ if(b===0) return '0 B'; const k=1024,s=['B','KB','MB','GB']; const i=Math.floor(Math.log(b)/Math.log(k)); return (b/Math.pow(k,i)).toFixed(1)+' '+s[i]; }
-
   function toOutName(name){ const base = name.replace(/\.[^.]+$/, ''); return base + '.' + formatSel.value; }
 
   // =====================
-  // Pipeline de processamento
+  // Pipeline
   // =====================
   function settings(){
     const q = Math.max(1, Math.min(100, Number(qualityInput.value)||85));
@@ -399,106 +427,35 @@
     const resize = !!resizeToggle.checked;
     const mw = Math.max(1, Number(maxW.value)||1920);
     const mh = Math.max(1, Number(maxH.value)||1080);
-    const cc = Math.max(1, Math.min(8, Number(concurrencyInput.value)||3));
+    const cc = Math.max(1, Math.min(8, Number(concurrencyInp.value)||3));
     state.concurrency = cc;
     return { format: formatSel.value, quality, resize, mw, mh, jpgBg: jpgBg.value };
   }
 
-  async function processItem(item){
-    const { format, quality, resize, mw, mh, jpgBg } = settings();
-
-    const update = (pct, stage) => { item.progress = pct; item.stage = stage; updateItem(item); updateSummary(); };
-    try{
-      item.status = 'Processando'; update(5, 'Preparando…'); await new Promise(r=>requestAnimationFrame(r));
-
-      // 1) Carregar/decodificar
-      update(20, 'Carregando imagem…');
-      let imgEl = new Image();
-      const dataURL = await fileToDataURL(item.file);
-      await new Promise((res, rej)=>{ imgEl.onload = ()=>res(); imgEl.onerror = ()=>rej(new Error('Falha ao decodificar imagem')); imgEl.src = dataURL; });
-      const srcW = imgEl.naturalWidth, srcH = imgEl.naturalHeight;
-
-      // Detecta alpha
-      item.hadAlpha = await detectAlpha(imgEl);
-      item.bgApplied = false; item.bgColor = jpgBg;
-
-      const maxSide = Math.max(srcW, srcH);
-      if(maxSide > LIMITS.MAX_SIDE && !resize){ throw new Error(`Maior lado (${maxSide}px) excede ${LIMITS.MAX_SIDE}px e redimensionamento está desligado.`); }
-
-      // 2) Redimensionar
-      let targetW = srcW, targetH = srcH;
-      const limitW = Math.min(mw, LIMITS.MAX_SIDE), limitH = Math.min(mh, LIMITS.MAX_SIDE);
-      if(resize && (srcW > limitW || srcH > limitH)){
-        const ratio = Math.min(limitW/srcW, limitH/srcH);
-        targetW = Math.max(1, Math.floor(srcW * ratio));
-        targetH = Math.max(1, Math.floor(srcH * ratio));
-      }
-      if(!resize && Math.max(targetW,targetH) > LIMITS.MAX_SIDE){ const r = LIMITS.MAX_SIDE / Math.max(targetW,targetH); targetW = Math.floor(targetW*r); targetH = Math.floor(targetH*r); }
-      update(50, resize ? `Redimensionando para ${targetW}×${targetH}…` : 'Mantendo dimensões…');
-
-      const canvas = document.createElement('canvas'); canvas.width = targetW; canvas.height = targetH; const ctx = canvas.getContext('2d');
-      if(format === 'jpg' && item.hadAlpha){ ctx.fillStyle = jpgBg || '#FFFFFF'; ctx.fillRect(0,0,targetW,targetH); item.bgApplied = true; }
-      ctx.drawImage(imgEl, 0, 0, targetW, targetH); imgEl.src = ''; imgEl = null;
-
-      // 3) Exportar
-      let mime = 'image/webp'; let q = quality; let note = `Comprimindo (qualidade ${(quality*100).toFixed(0)}%)…`;
-      if(format === 'jpg') mime = 'image/jpeg';
-      else if(format === 'png'){ mime = 'image/png'; q = undefined; note = 'Gerando PNG (lossless)…'; }
-      update(90, note);
-
-      const blob = await canvasToType(canvas, mime, q);
-
-      // 4) Final
-      item.resultBlob = blob; item.status = 'Concluído'; update(100, item.bgApplied ? 'Concluído (JPG sem transparência)' : 'Concluído');
-      const ctxAny = ctx; if(ctxAny && ctxAny.reset) ctxAny.reset();
-    } catch(err){ item.status = 'Erro'; item.stage = 'Erro'; notify(err.message || 'Erro no processamento'); }
+  function fileToDataURL(file){
+    return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = ()=> res(r.result); r.onerror = ()=> rej(new Error('Falha ao ler arquivo')); r.readAsDataURL(file); });
   }
 
-      // 2) Redimensionar (se necessário)
-      let targetW = srcW, targetH = srcH;
-      const limitW = Math.min(mw, LIMITS.MAX_SIDE), limitH = Math.min(mh, LIMITS.MAX_SIDE);
-      if(resize && (srcW > limitW || srcH > limitH)){
-        const ratio = Math.min(limitW/srcW, limitH/srcH);
-        targetW = Math.max(1, Math.floor(srcW * ratio));
-        targetH = Math.max(1, Math.floor(srcH * ratio));
-      }
-      if(!resize && Math.max(targetW,targetH) > LIMITS.MAX_SIDE){ const r = LIMITS.MAX_SIDE / Math.max(targetW,targetH); targetW = Math.floor(targetW*r); targetH = Math.floor(targetH*r); }
-      update(50, resize ? `Redimensionando para ${targetW}×${targetH}…` : 'Mantendo dimensões…');
-
-      const canvas = document.createElement('canvas'); canvas.width = targetW; canvas.height = targetH; const ctx = canvas.getContext('2d');
-      // Se for JPG, preenche fundo para lidar com transparência
-      if(format === 'jpg'){ ctx.fillStyle = jpgBg || '#FFFFFF'; ctx.fillRect(0,0,targetW,targetH); }
-      ctx.drawImage(imgEl, 0, 0, targetW, targetH); imgEl.src = ''; imgEl = null;
-
-      // 3) Exportar conforme formato
-      let mime = 'image/webp'; let q = quality; let note = `Comprimindo (qualidade ${(quality*100).toFixed(0)}%)…`;
-      if(format === 'jpg'){ mime = 'image/jpeg'; }
-      else if(format === 'png'){ mime = 'image/png'; q = undefined; note = 'Gerando PNG (lossless)…'; }
-      update(90, note);
-
-      const blob = await canvasToType(canvas, mime, q);
-
-      // 4) Finalizar
-      item.resultBlob = blob; item.status = 'Concluído'; update(100, 'Concluído');
-      ctx && ctx.reset && ctx.reset();
-    } catch(err){ item.status = 'Erro'; item.stage = 'Erro'; notify(err.message || 'Erro no processamento'); }
+  function dataURLToBlob(dataURL){
+    const parts = dataURL.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const bstr = atob(parts[1]); let n = bstr.length; const u8 = new Uint8Array(n);
+    while(n--) u8[n] = bstr.charCodeAt(n);
+    return new Blob([u8], { type: mime });
   }
-
-  function fileToDataURL(file){ return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = ()=> res(r.result); r.onerror = ()=> rej(new Error('Falha ao ler arquivo')); r.readAsDataURL(file); }); }
 
   function canvasToType(canvas, mime, quality){
     return new Promise((res, rej)=>{
       if(canvas.toBlob){
         canvas.toBlob((b)=>{ if(!b){ rej(new Error('Falha ao exportar imagem')); return; } res(b); }, mime, quality);
       } else {
-        try{ const dataURL = canvas.toDataURL(mime, quality); res(dataURLToBlob(dataURL)); }catch(e){ rej(new Error('Exportação não suportada')); }
+        try { const dataURL = canvas.toDataURL(mime, quality); res(dataURLToBlob(dataURL)); }
+        catch(e){ rej(new Error('Exportação não suportada')); }
       }
     });
   }
 
-  function dataURLToBlob(dataURL){ const parts = dataURL.split(','); const mime = parts[0].match(/:(.*?);/)[1]; const bstr = atob(parts[1]); let n = bstr.length; const u8 = new Uint8Array(n); while(n--){ u8[n] = bstr.charCodeAt(n); } return new Blob([u8], { type: mime }); }
-
-  // Heurística rápida: verifica se há pixels com alpha < 255 em uma versão reduzida
+  // Heurística rápida: detecta alpha em versão reduzida
   async function detectAlpha(imgEl){
     const probeW = 96;
     const ratio = Math.min(1, probeW / imgEl.naturalWidth);
@@ -512,19 +469,109 @@
     return false;
   }
 
+  // Processamento de 1 item
+  async function processItem(item){
+    const { format, quality, resize, mw, mh, jpgBg } = settings();
+    const update = (pct, stage) => { item.progress = pct; item.stage = stage; updateItem(item); updateSummary(); };
+
+    try{
+      item.status = 'Processando'; update(5, 'Preparando…'); await new Promise(r=>requestAnimationFrame(r));
+
+      // 1) Carregar
+      update(20, 'Carregando imagem…');
+      let imgEl = new Image();
+      const dataURL = await fileToDataURL(item.file);
+      await new Promise((res, rej)=>{ imgEl.onload = ()=>res(); imgEl.onerror = ()=>rej(new Error('Falha ao decodificar imagem')); imgEl.src = dataURL; });
+      const srcW = imgEl.naturalWidth, srcH = imgEl.naturalHeight;
+
+      // Detecta alpha
+      item.hadAlpha = await detectAlpha(imgEl);
+      item.bgApplied = false; item.bgColor = jpgBg;
+
+      // Limites
+      const maxSide = Math.max(srcW, srcH);
+      if(maxSide > LIMITS.MAX_SIDE && !resize){ throw new Error(`Maior lado (${maxSide}px) excede ${LIMITS.MAX_SIDE}px e redimensionamento está desligado.`); }
+
+      // 2) Redimensionar
+      let targetW = srcW, targetH = srcH;
+      const limitW = Math.min(mw, LIMITS.MAX_SIDE), limitH = Math.min(mh, LIMITS.MAX_SIDE);
+      if(resize && (srcW > limitW || srcH > limitH)){
+        const ratio = Math.min(limitW/srcW, limitH/srcH);
+        targetW = Math.max(1, Math.floor(srcW * ratio));
+        targetH = Math.max(1, Math.floor(srcH * ratio));
+      }
+      if(!resize && Math.max(targetW,targetH) > LIMITS.MAX_SIDE){
+        const r = LIMITS.MAX_SIDE / Math.max(targetW,targetH);
+        targetW = Math.floor(targetW*r); targetH = Math.floor(targetH*r);
+      }
+      update(50, resize ? `Redimensionando para ${targetW}×${targetH}…` : 'Mantendo dimensões…');
+
+      const canvas = document.createElement('canvas'); canvas.width = targetW; canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      // 3) Desenhar + fundo se JPG com alpha
+      if(format === 'jpg' && item.hadAlpha){
+        ctx.fillStyle = jpgBg || '#FFFFFF'; ctx.fillRect(0,0,targetW,targetH); item.bgApplied = true;
+      }
+      ctx.drawImage(imgEl, 0, 0, targetW, targetH); imgEl.src = ''; imgEl = null;
+
+      // 4) Exportar
+      let mime = 'image/webp'; let q = quality; let note = `Comprimindo (qualidade ${(quality*100).toFixed(0)}%)…`;
+      if(format === 'jpg') mime = 'image/jpeg';
+      else if(format === 'png'){ mime = 'image/png'; q = undefined; note = 'Gerando PNG (lossless)…'; }
+      update(90, note);
+
+      const blob = await canvasToType(canvas, mime, q);
+
+      // 5) Finalizar
+      item.resultBlob = blob; item.status = 'Concluído';
+      update(100, item.bgApplied ? 'Concluído (JPG sem transparência)' : 'Concluído');
+      if(ctx && ctx.reset) ctx.reset();
+    } catch(err){
+      item.status = 'Erro'; item.stage = 'Erro'; notify(err.message || 'Erro no processamento');
+    }
+  }
+
   // =====================
   // Scheduler (concorrência fixa)
   // =====================
-  function schedule(){ if(state.paused) return; const conc = state.concurrency; while(state.running < conc){ const next = state.items.find(i=>i.status==='Fila'); if(!next) break; state.running++; processItem(next).finally(()=>{ state.running--; updateItem(next); updateSummary(); schedule(); }); } }
+  function schedule(){
+    if(state.paused) return;
+    const conc = state.concurrency;
+    while(state.running < conc){
+      const next = state.items.find(i => i.status === 'Fila');
+      if(!next) break;
+      state.running++;
+      processItem(next).finally(()=>{ state.running--; updateItem(next); updateSummary(); schedule(); });
+    }
+  }
 
   // =====================
   // Ações globais
   // =====================
-  function convertAll(){ if(!state.items.length){ notify('Adicione arquivos primeiro.'); return; } state.paused = false; schedule(); notify('Conversão iniciada.'); }
+  function convertAll(){
+    if(!state.items.length){ notify('Adicione arquivos primeiro.'); return; }
+    state.paused = false; schedule(); notify('Conversão iniciada.');
+  }
   function pause(){ state.paused = true; notify('Pausado (novos itens não iniciam).'); }
   function resume(){ if(!state.items.length){ notify('Nenhum item na fila.'); return; } state.paused = false; schedule(); notify('Retomado.'); }
-  function clearQueue(){ state.items.forEach(i=>{ if(i.url) URL.revokeObjectURL(i.url); }); state.items = []; state.running = 0; state.paused = false; fileList.innerHTML = ''; updateSummary(); notify('Fila limpa.'); }
-  async function downloadZip(){ const done = state.items.filter(i=>i.status==='Concluído' && i.resultBlob); if(!done.length){ notify('Não há arquivos concluídos para zipar.'); return; } const zip = new JSZip(); done.forEach(i=> zip.file(toOutName(i.name), i.resultBlob)); notify('Gerando ZIP…'); const blob = await zip.generateAsync({ type:'blob' }, (meta)=>{ totalText.textContent = `Compactando: ${(meta.percent||0).toFixed(0)}%`; }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); const ts = new Date().toISOString().replace(/[-:T]/g,'').slice(0,12); a.href = url; a.download = `batch_${formatSel.value}_${ts}.zip`; a.click(); setTimeout(()=> URL.revokeObjectURL(url), 10000); notify('ZIP gerado.'); }
+  function clearQueue(){
+    state.items.forEach(i=>{ if(i.url) URL.revokeObjectURL(i.url); });
+    state.items = []; state.running = 0; state.paused = false;
+    fileList.innerHTML = ''; updateSummary(); notify('Fila limpa.');
+  }
+  async function downloadZip(){
+    const done = state.items.filter(i=>i.status==='Concluído' && i.resultBlob);
+    if(!done.length){ notify('Não há arquivos concluídos para zipar.'); return; }
+    const zip = new JSZip(); done.forEach(i=> zip.file(toOutName(i.name), i.resultBlob));
+    notify('Gerando ZIP…');
+    const blob = await zip.generateAsync({ type:'blob' }, (meta)=>{ totalText.textContent = `Compactando: ${(meta.percent||0).toFixed(0)}%`; });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); const ts = new Date().toISOString().replace(/[-:T]/g,'').slice(0,12);
+    a.href = url; a.download = `batch_${formatSel.value}_${ts}.zip`; a.click();
+    setTimeout(()=> URL.revokeObjectURL(url), 10000);
+    notify('ZIP gerado.');
+  }
 
   [btns.convert, btns.mConvert].forEach(b=> b.addEventListener('click', convertAll));
   [btns.pause, btns.mPause].forEach(b=> b.addEventListener('click', pause));
@@ -532,12 +579,27 @@
   btns.clear.addEventListener('click', clearQueue);
   [btns.zip, btns.mZip].forEach(b=> b.addEventListener('click', downloadZip));
 
-  // Presets
-  savePresetBtn.addEventListener('click', ()=>{ const name = prompt('Nome do preset:'); if(!name) return; savePreset(name); notify(`Preset "${name}" salvo.`); });
-  applyPresetSel.addEventListener('change', ()=>{ const name = applyPresetSel.value; if(!name) return; const list = loadPresets(); const p = list[name]; if(!p) return; formatSel.value = p.format || 'webp'; qualityInput.value = p.q ?? 85; qualityRange.value = p.q ?? 85; resizeToggle.checked = !!p.resize; maxW.value = p.mw; maxH.value = p.mh; concurrencyInput.value = p.cc ?? 3; jpgBg.value = p.jpgBg || '#FFFFFF'; refreshQualityVisibility(); settings(); notify(`Preset "${name}" aplicado.`); });
-  deletePresetBtn.addEventListener('click', ()=>{ const name = applyPresetSel.value; if(!name) { alert('Selecione um preset para excluir.'); return; } if(confirm(`Excluir preset "${name}"?`)){ deletePreset(name); notify('Preset excluído.'); } });
+  // Presets ações
+  savePresetBtn.addEventListener('click', ()=>{
+    const name = prompt('Nome do preset:'); if(!name) return;
+    savePreset(name); notify(`Preset "${name}" salvo.`);
+  });
+  applyPresetSel.addEventListener('change', ()=>{
+    const name = applyPresetSel.value; if(!name) return;
+    const list = loadPresets(); const p = list[name]; if(!p) return;
+    formatSel.value = p.format || 'webp';
+    qualityInput.value = p.q ?? 85; qualityRange.value = p.q ?? 85;
+    jpgBg.value = p.jpgBg || '#FFFFFF';
+    resizeToggle.checked = !!p.resize; maxW.value = p.mw; maxH.value = p.mh;
+    concurrencyInp.value = p.cc ?? 3;
+    applyFormatUI(); settings(); notify(`Preset "${name}" aplicado.`);
+  });
+  deletePresetBtn.addEventListener('click', ()=>{
+    const name = applyPresetSel.value; if(!name) { alert('Selecione um preset para excluir.'); return; }
+    if(confirm(`Excluir preset "${name}"?`)){ deletePreset(name); notify('Preset excluído.'); }
+  });
 
-  // Acessibilidade extra: teclas de atalho
+  // Atalhos
   window.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)) convertAll(); if(e.key==='Escape') pause(); });
   </script>
 </body>
