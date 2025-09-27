@@ -44,4 +44,5 @@ App 100% client‑side (HTML+CSS+JS) para converter PNG/JPEG/WebP → **WebP** c
 
 
 ## Licença
+feito por Thales Pacheco
 Uso interno Grifo Agency (MVP). Ajuste conforme necessidade.
